@@ -9,5 +9,7 @@ YELLOW_BGR = [0, 255, 255]
 SERIAL_PORT = "COM3"  # Change this to match your Arduino's serial port
 BAUD_RATE = 9600
 
-LOWER_HSV_LIMIT = [16, 3, 255]  # Lower HSV values for color range detection
-UPPER_HSV_LIMIT = [90, 232, 255]  # Upper HSV values for color range detection
+LOWER_HSV_LIMIT = [9, 70, 150]  # Lower HSV values for color range detection
+UPPER_HSV_LIMIT = [21, 233, 255]  # Upper HSV values for color range detection
+
+CALIBRATION_FILE = "assets/calibration.pkl"

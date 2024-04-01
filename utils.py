@@ -1,8 +1,19 @@
 import cv2
 import numpy as np
+from serial import Serial
+from serial import SerialException
 
+from arduino import BAUD_RATE
+from arduino import SERIAL_PORT
 from constants import LOWER_HSV_LIMIT
 from constants import UPPER_HSV_LIMIT
+
+# Establish serial connection
+try:
+    ser = Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+    print("Serial connection established.")
+except SerialException as e:
+    print("Error: Serial connection failed:", e)
 
 
 def get_target(img: np.ndarray):
@@ -29,3 +40,56 @@ def get_target(img: np.ndarray):
                 largest_box = (x, y, w, h)
 
     return largest_box
+
+
+# Function to map angle to servo pulse width for servo X (range: 0-210)
+def map_angle_to_pulse_width_x(angle):
+    min_angle = 0
+    max_angle = 210
+    min_pulse_width = 500
+    max_pulse_width = 2500
+    return int(
+        (angle - min_angle)
+        * (max_pulse_width - min_pulse_width)
+        / (max_angle - min_angle)
+        + min_pulse_width
+    )
+
+
+# Function to map angle to servo pulse width for servo Y (range: 0-320)
+def map_angle_to_pulse_width_z(angle):
+    min_angle = 0
+    max_angle = 320
+    min_pulse_width = 500
+    max_pulse_width = 2500
+    return int(
+        (angle - min_angle)
+        * (max_pulse_width - min_pulse_width)
+        / (max_angle - min_angle)
+        + min_pulse_width
+    )
+
+
+def shoot_target(servoX_angle, servoZ_angle, isShoot):
+    # Update angles by adding deltas to previous angles
+    if servoX_angle < 0:
+        servoX_angle = 0
+    elif servoX_angle > 210:
+        servoX_angle = 210
+
+    if servoZ_angle < 0:
+        servoZ_angle = 0
+    elif servoZ_angle > 320:
+        servoZ_angle = 320
+
+    # servo X should not hit the ground for protection
+    if servoX_angle > 120:
+        servoX_angle = 120
+
+    # Convert angle to servo pulse width
+    pulse_width_x = map_angle_to_pulse_width_x(servoX_angle)
+    pulse_width_z = map_angle_to_pulse_width_z(servoZ_angle)
+
+    # Send pulse width data to Arduino
+    isShoot = 0
+    ser.write(f"{pulse_width_x} {pulse_width_z} {isShoot}\n".encode())

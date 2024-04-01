@@ -5,20 +5,24 @@ import numpy as np
 
 # from arduino import position_camera
 # from arduino import rotate_camera
+from arduino import rotate_camera
+from constants import CALIBRATION_FILE
 from constants import FRAME_HEIGHT
 from constants import FRAME_WIDTH
 from constants import HFOV
 from constants import VFOV
 from utils import get_target
+from utils import shoot_target
+
+servoX_angle = 0
+servoZ_angle = 0
+
+with open(CALIBRATION_FILE, "rb") as file:
+    camera_matrix, dist_coeffs = pickle.load(file)
 
 
-def load_calibration_data(calibration_file):
-    with open(calibration_file, "rb") as file:
-        camera_matrix, dist_coeffs = pickle.load(file)
-    return camera_matrix, dist_coeffs
-
-
-def undistort_points(points, camera_matrix, dist_coeffs):
+def undistort_points(points):
+    global camera_matrix, dist_coeffs
     points = np.array(points, dtype=np.float32).reshape(-1, 1, 2)
     undistorted_points = cv2.undistortPoints(
         points, camera_matrix, dist_coeffs, P=camera_matrix
@@ -41,23 +45,61 @@ def calculate_rotation_angles(
     return rotation_angle_hor, rotation_angle_ver
 
 
-if __name__ == "__main__":
-    # Load camera calibration data
-    calibration_file = "assets/calibration.pkl"  # Adjust the filename/path as necessary
-    camera_matrix, dist_coeffs = load_calibration_data(calibration_file)
+def mouse_click(event, x, y, flags, param):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        target_x, target_y = (
+            x,
+            y,
+        )  # Assuming x, y are the coordinates where the mouse was clicked
+        direct_camera(target_x, target_y)
 
+
+def direct_camera(target_center_x, target_center_y):
+    global servoX_angle, servoZ_angle
+    # Undistort the center point
+    undistorted_point = undistort_points([(target_center_x, target_center_y)])
+    undistorted_target_center_x, undistorted_target_center_y = undistorted_point[0]
+
+    frame_center_x = FRAME_WIDTH // 2
+    frame_center_y = FRAME_HEIGHT // 2
+    rotation_angle_hor, rotation_angle_ver = calculate_rotation_angles(
+        undistorted_target_center_x,
+        undistorted_target_center_y,
+    )
+
+    # print(
+    #     f"Rotation Angle Vertical: {rotation_angle_ver} degrees, Rotation Angle Horizontal: {rotation_angle_hor} degrees"
+    # )
+
+    servoX_angle += -rotation_angle_hor
+    servoZ_angle += -rotation_angle_ver
+
+    print(servoX_angle, servoZ_angle)
+
+    shoot_target(servoX_angle, servoZ_angle, False)
+
+
+def shoot():
+    print("Shooting at target")
+    shoot_target(servoX_angle, servoZ_angle, True)
+
+
+if __name__ == "__main__":
     # Initialize previous angles
     prev_angle_x = 0
     prev_angle_z = 0
 
     cap = cv2.VideoCapture(0)
 
+    cv2.namedWindow("Tracking")
+    cv2.setMouseCallback("Tracking", mouse_click)
+
     while True:
         ret, img = cap.read()
         if not ret:
             print("Failed to grab frame")
             exit()
-
+        key = cv2.waitKey(1)
         # Track the color and get the center of the largest bounding box
         target_bounding_box = get_target(img)
         if target_bounding_box is not None:
@@ -70,34 +112,13 @@ if __name__ == "__main__":
                 (0, 255, 0),
                 2,
             )
+            if key == ord(" "):
+                direct_camera(target_center_x, target_center_y)
 
-        cv2.imshow("Tracking", img)
-        key = cv2.waitKey(1)
         if key == ord("q"):
             break
-            # Undistort the center point
-            undistorted_point = undistort_points(
-                [(target_center_x, target_center_y)], camera_matrix, dist_coeffs
-            )
-            undistorted_target_center_x, undistorted_target_center_y = (
-                undistorted_point[0]
-            )
 
-            frame_center_x = FRAME_WIDTH // 2
-            frame_center_y = FRAME_HEIGHT // 2
-            rotation_angle_hor, rotation_angle_ver = calculate_rotation_angles(
-                undistorted_target_center_x,
-                undistorted_target_center_y,
-            )
+        if key == ord("s"):
+            shoot()
 
-            print(
-                f"Rotation Angle Vertical: {rotation_angle_ver} degrees, Rotation Angle Horizontal: {rotation_angle_hor} degrees"
-            )
-            # # Here, you can add code to rotate the camera based on the calculated rotation angles.
-
-            # curr_x, curr_z = position_camera()
-
-            # rotate_camera(curr_x, curr_z, rotation_angle_ver, rotation_angle_hor)
-
-        else:
-            print("No color detected within the specified time frame.")
+        cv2.imshow("Tracking", img)
