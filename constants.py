@@ -9,7 +9,10 @@ YELLOW_BGR = [0, 255, 255]
 SERIAL_PORT = "COM3"  # Change this to match your Arduino's serial port
 BAUD_RATE = 9600
 
-LOWER_HSV_LIMIT = [9, 70, 150]  # Lower HSV values for color range detection
-UPPER_HSV_LIMIT = [21, 233, 255]  # Upper HSV values for color range detection
+LOWER_HSV_LIMIT = [0, 79, 145]  # Lower HSV values for color range detection
+UPPER_HSV_LIMIT = [179, 164, 206]  # Upper HSV values for color range detection
 
 CALIBRATION_FILE = "assets/calibration.pkl"
+
+CAMERA_INDEX = 1
+CAMERA_NOZZLE_ANGLE_OFFSET = -11

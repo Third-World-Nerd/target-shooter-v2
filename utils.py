@@ -1,11 +1,14 @@
+import time
+
 import cv2
 import numpy as np
 from serial import Serial
 from serial import SerialException
 
-from arduino import BAUD_RATE
-from arduino import SERIAL_PORT
+from constants import BAUD_RATE
+from constants import CAMERA_NOZZLE_ANGLE_OFFSET
 from constants import LOWER_HSV_LIMIT
+from constants import SERIAL_PORT
 from constants import UPPER_HSV_LIMIT
 
 # Establish serial connection
@@ -72,6 +75,18 @@ def map_angle_to_pulse_width_z(angle):
 
 def shoot_target(servoX_angle, servoZ_angle, isShoot):
     # Update angles by adding deltas to previous angles
+
+    # Convert angle to servo pulse width
+    pulse_width_x = map_angle_to_pulse_width_x(
+        servoX_angle + CAMERA_NOZZLE_ANGLE_OFFSET
+    )
+    pulse_width_z = map_angle_to_pulse_width_z(servoZ_angle)
+
+    # Send pulse width data to Arduino
+    ser.write(f"{pulse_width_x} {pulse_width_z} {isShoot}\n".encode())
+
+
+def limit_angles(servoX_angle, servoZ_angle):
     if servoX_angle < 0:
         servoX_angle = 0
     elif servoX_angle > 210:
@@ -86,10 +101,4 @@ def shoot_target(servoX_angle, servoZ_angle, isShoot):
     if servoX_angle > 120:
         servoX_angle = 120
 
-    # Convert angle to servo pulse width
-    pulse_width_x = map_angle_to_pulse_width_x(servoX_angle)
-    pulse_width_z = map_angle_to_pulse_width_z(servoZ_angle)
-
-    # Send pulse width data to Arduino
-    isShoot = 0
-    ser.write(f"{pulse_width_x} {pulse_width_z} {isShoot}\n".encode())
+    return servoX_angle, servoZ_angle

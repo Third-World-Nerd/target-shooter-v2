@@ -5,13 +5,14 @@ import numpy as np
 
 # from arduino import position_camera
 # from arduino import rotate_camera
-from arduino import rotate_camera
 from constants import CALIBRATION_FILE
+from constants import CAMERA_INDEX
 from constants import FRAME_HEIGHT
 from constants import FRAME_WIDTH
 from constants import HFOV
 from constants import VFOV
 from utils import get_target
+from utils import limit_angles
 from utils import shoot_target
 
 servoX_angle = 0
@@ -58,30 +59,25 @@ def direct_camera(target_center_x, target_center_y):
     global servoX_angle, servoZ_angle
     # Undistort the center point
     undistorted_point = undistort_points([(target_center_x, target_center_y)])
+    print(target_center_x, target_center_y, undistorted_point)
     undistorted_target_center_x, undistorted_target_center_y = undistorted_point[0]
 
-    frame_center_x = FRAME_WIDTH // 2
-    frame_center_y = FRAME_HEIGHT // 2
     rotation_angle_hor, rotation_angle_ver = calculate_rotation_angles(
         undistorted_target_center_x,
         undistorted_target_center_y,
     )
 
-    # print(
-    #     f"Rotation Angle Vertical: {rotation_angle_ver} degrees, Rotation Angle Horizontal: {rotation_angle_hor} degrees"
-    # )
+    servoZ_angle += -rotation_angle_hor
+    servoX_angle += rotation_angle_ver
 
-    servoX_angle += -rotation_angle_hor
-    servoZ_angle += -rotation_angle_ver
+    servoX_angle, servoZ_angle = limit_angles(servoX_angle, servoZ_angle)
 
-    print(servoX_angle, servoZ_angle)
-
-    shoot_target(servoX_angle, servoZ_angle, False)
+    shoot_target(servoX_angle, servoZ_angle, 0)
 
 
 def shoot():
     print("Shooting at target")
-    shoot_target(servoX_angle, servoZ_angle, True)
+    shoot_target(servoX_angle, servoZ_angle, 1)
 
 
 if __name__ == "__main__":
@@ -89,7 +85,7 @@ if __name__ == "__main__":
     prev_angle_x = 0
     prev_angle_z = 0
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(CAMERA_INDEX)
 
     cv2.namedWindow("Tracking")
     cv2.setMouseCallback("Tracking", mouse_click)

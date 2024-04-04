@@ -41,7 +41,7 @@ def get_hsv_color_range(image, rectangle):
 
 
 # Start capturing video from the webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 cv2.namedWindow("Webcam")
 cv2.setMouseCallback("Webcam", draw_rectangle)
 
