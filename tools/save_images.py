@@ -3,13 +3,13 @@ import os
 import cv2
 
 # Initialize the camera
-cap = cv2.VideoCapture(0)  # 0 is usually the default camera
+cap = cv2.VideoCapture(1)  # 0 is usually the default camera
 
 num = 0  # Counter for image filenames
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
-image_dir = os.path.join(script_dir, "assets/images")  # Path for the "images" folder
+image_dir = os.path.join(script_dir, "../assets/images")  # Path for the "images" folder
 
 # Create the "images" folder if it doesn't exist
 if not os.path.exists(image_dir):

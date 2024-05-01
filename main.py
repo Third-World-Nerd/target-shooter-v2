@@ -59,7 +59,12 @@ def direct_camera(target_center_x, target_center_y):
     global servoX_angle, servoZ_angle
     # Undistort the center point
     undistorted_point = undistort_points([(target_center_x, target_center_y)])
-    print(target_center_x, target_center_y, undistorted_point)
+    print(
+        "distorted and undistorted coordinates:",
+        target_center_x,
+        target_center_y,
+        undistorted_point,
+    )
     undistorted_target_center_x, undistorted_target_center_y = undistorted_point[0]
 
     rotation_angle_hor, rotation_angle_ver = calculate_rotation_angles(
@@ -72,12 +77,12 @@ def direct_camera(target_center_x, target_center_y):
 
     servoX_angle, servoZ_angle = limit_angles(servoX_angle, servoZ_angle)
 
-    shoot_target(servoX_angle, servoZ_angle, 0)
+    shoot_target(servoX_angle, servoZ_angle, 0, 0)
 
 
 def shoot():
     print("Shooting at target")
-    shoot_target(servoX_angle, servoZ_angle, 1)
+    shoot_target(servoX_angle, servoZ_angle, 1, 1000)
 
 
 if __name__ == "__main__":

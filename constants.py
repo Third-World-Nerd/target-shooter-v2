@@ -6,11 +6,11 @@ FRAME_HEIGHT = 960  # Should match the frame height used in camera calibration
 # Define the BGR color to track (example: yellow)
 YELLOW_BGR = [0, 255, 255]
 # Serial port configuration
-SERIAL_PORT = "COM3"  # Change this to match your Arduino's serial port
+SERIAL_PORT = "COM12"  # Change this to match your Arduino's serial port
 BAUD_RATE = 9600
 
-LOWER_HSV_LIMIT = [0, 79, 145]  # Lower HSV values for color range detection
-UPPER_HSV_LIMIT = [179, 164, 206]  # Upper HSV values for color range detection
+LOWER_HSV_LIMIT = [31, 137, 145]  # Lower HSV values for color range detection
+UPPER_HSV_LIMIT = [43, 228, 182]  # Upper HSV values for color range detection
 
 CALIBRATION_FILE = "assets/calibration.pkl"
 

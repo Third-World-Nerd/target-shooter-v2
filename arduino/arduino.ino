@@ -32,13 +32,14 @@ void loop() {
     int inputX = Serial.parseInt();
     int inputY = Serial.parseInt();
     int arc = Serial.parseInt();
+    int delayarc = Serial.parseInt();
 
     // Write the mapped values to the servos
     servoX.writeMicroseconds(inputX);
     servoY.writeMicroseconds(inputY);
-    delay(1000);
+    // delay(1000);
     digitalWrite(arcPin, arc);
-    delay(1000);
+    delay(delayarc);
     digitalWrite(arcPin, LOW);
     // Serial.println(inputX);
     // Serial.println(inputY);

@@ -1,5 +1,3 @@
-import time
-
 import cv2
 import numpy as np
 from serial import Serial
@@ -73,7 +71,7 @@ def map_angle_to_pulse_width_z(angle):
     )
 
 
-def shoot_target(servoX_angle, servoZ_angle, isShoot):
+def shoot_target(servoX_angle, servoZ_angle, isShoot, delay):
     # Update angles by adding deltas to previous angles
 
     # Convert angle to servo pulse width
@@ -83,7 +81,7 @@ def shoot_target(servoX_angle, servoZ_angle, isShoot):
     pulse_width_z = map_angle_to_pulse_width_z(servoZ_angle)
 
     # Send pulse width data to Arduino
-    ser.write(f"{pulse_width_x} {pulse_width_z} {isShoot}\n".encode())
+    ser.write(f"{pulse_width_x} {pulse_width_z} {isShoot} {delay}\n".encode())
 
 
 def limit_angles(servoX_angle, servoZ_angle):
