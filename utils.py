@@ -4,7 +4,6 @@ from serial import Serial
 from serial import SerialException
 
 from constants import BAUD_RATE
-from constants import CAMERA_NOZZLE_ANGLE_OFFSET
 from constants import LOWER_HSV_LIMIT
 from constants import SERIAL_PORT
 from constants import UPPER_HSV_LIMIT
@@ -75,9 +74,7 @@ def shoot_target(servoX_angle, servoZ_angle, isShoot, delay):
     # Update angles by adding deltas to previous angles
 
     # Convert angle to servo pulse width
-    pulse_width_x = map_angle_to_pulse_width_x(
-        servoX_angle + CAMERA_NOZZLE_ANGLE_OFFSET
-    )
+    pulse_width_x = map_angle_to_pulse_width_x(servoX_angle)
     pulse_width_z = map_angle_to_pulse_width_z(servoZ_angle)
 
     # Send pulse width data to Arduino
@@ -96,7 +93,10 @@ def limit_angles(servoX_angle, servoZ_angle):
         servoZ_angle = 320
 
     # servo X should not hit the ground for protection
-    if servoX_angle > 120:
-        servoX_angle = 120
+    if servoX_angle > 150:
+        servoX_angle = 150
+
+    if servoX_angle < 63:
+        servoX_angle = 63
 
     return servoX_angle, servoZ_angle

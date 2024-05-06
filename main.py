@@ -7,6 +7,7 @@ import numpy as np
 # from arduino import rotate_camera
 from constants import CALIBRATION_FILE
 from constants import CAMERA_INDEX
+from constants import CAMERA_NOZZLE_ANGLE_OFFSET
 from constants import FRAME_HEIGHT
 from constants import FRAME_WIDTH
 from constants import HFOV
@@ -15,7 +16,7 @@ from utils import get_target
 from utils import limit_angles
 from utils import shoot_target
 
-servoX_angle = 0
+servoX_angle = 63
 servoZ_angle = 0
 
 with open(CALIBRATION_FILE, "rb") as file:
@@ -73,7 +74,7 @@ def direct_camera(target_center_x, target_center_y):
     )
 
     servoZ_angle += -rotation_angle_hor
-    servoX_angle += rotation_angle_ver
+    servoX_angle = servoX_angle + rotation_angle_ver + CAMERA_NOZZLE_ANGLE_OFFSET
 
     servoX_angle, servoZ_angle = limit_angles(servoX_angle, servoZ_angle)
 

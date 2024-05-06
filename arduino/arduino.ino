@@ -8,6 +8,8 @@ Servo servoY;
 const int minPulseWidth = 500; // 0.5 ms
 const int maxPulseWidth = 2500; // 2.5 ms
 
+const int minPulseWidthX = 1100; // i.e 63 degrees
+
 // Define the pins for the servos
 const int servoXPin = 5;
 const int servoYPin = 6;
@@ -18,7 +20,7 @@ void setup() {
   servoX.attach(servoXPin);
   servoY.attach(servoYPin);
   pinMode(arcPin, OUTPUT);
-  servoX.writeMicroseconds(minPulseWidth);
+  servoX.writeMicroseconds(minPulseWidthX);
   servoY.writeMicroseconds(minPulseWidth);
 
 
@@ -33,6 +35,9 @@ void loop() {
     int inputY = Serial.parseInt();
     int arc = Serial.parseInt();
     int delayarc = Serial.parseInt();
+    if (inputX < minPulseWidthX){
+      inputX = minPulseWidthX;
+    }
 
     // Write the mapped values to the servos
     servoX.writeMicroseconds(inputX);
